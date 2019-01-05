@@ -25,7 +25,7 @@ namespace api.Infrastructure.Repository
       try
       {
 
-       Teacher objUser = new Teacher(); ;
+       Teacher objUser = new Teacher();
 
         conn = new SqlConnection(Functions.GetConnectionString());
 

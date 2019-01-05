@@ -23,7 +23,7 @@ namespace api.Common.Infrastructure.Security
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim("shortName", userAuthDto.shortName),
             new Claim("fullName", userAuthDto.fullName),
-            new Claim("userID", userAuthDto.id.ToString()),
+            new Claim("teacherID", userAuthDto.id.ToString()),
             new Claim("roleID", userAuthDto.roleID.ToString()),
             new Claim("schoolID", userAuthDto.schoolID.ToString())
 

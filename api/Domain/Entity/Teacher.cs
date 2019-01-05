@@ -1,3 +1,4 @@
+using api.Domain.Repository;
 using System;
 
 namespace api.Domain.Entity
@@ -31,6 +32,7 @@ namespace api.Domain.Entity
 
     public String Password { get; set; }
         public String shortName { get; set; }
+
     }
   }
 

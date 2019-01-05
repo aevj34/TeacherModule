@@ -40,6 +40,18 @@ namespace api.Domain.Entity
             return folder;
         }
 
+        public Folder getStudentsFolder(int schoolID, int bucketID)
+        {
+            FolderAdoNetRepository folderAdoNetRepository = new FolderAdoNetRepository();
+            const bool active = true;
+            const int folderStudents = 1;
+
+            Folder folder = new Folder();
+            folder = folderAdoNetRepository.GetByfolderTypeIDBybucketIDByschoolIDByactive(folderStudents, bucketID, schoolID, active);
+
+            return folder;
+        }
+
         public String getTeacherEndPoint(int schoolID, String ImageKey)
         {
             Bucket bucket = new Bucket();
@@ -62,6 +74,30 @@ namespace api.Domain.Entity
 
             return this.prefix + this.region + "." + this.webAmazon + "/" + bucketName  + "/" + folderTeachers + "/" + ImageKey;
         }
+
+        public String getStudentEndPoint(int schoolID, String ImageKey)
+        {
+            Bucket bucket = new Bucket();
+            bucket = getCurrentBucket(schoolID);
+
+            string bucketName = "";
+            string folderStudents = "";
+
+            if (bucket != null)
+            {
+                bucketName = bucket.name;
+                Folder folder = new Folder();
+                folder = getStudentsFolder(schoolID, bucket.bucketID);
+
+                if (folder != null)
+                {
+                    folderStudents = folder.name;
+                }
+            }
+
+            return this.prefix + this.region + "." + this.webAmazon + "/" + bucketName + "/" + folderStudents + "/" + ImageKey;
+        }
+
 
     }
 }

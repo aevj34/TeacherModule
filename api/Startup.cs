@@ -44,6 +44,26 @@ namespace api
             });
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            services.AddCors(
+options => options.AddPolicy("AllowCors",
+builder =>
+{
+ builder
+ .WithOrigins("http://localhost:4200") //AllowSpecificOrigins;
+                                       //.WithOrigins("http://localhost:57872", "http://localhost:57872") //AllowMultipleOrigins;
+ .AllowAnyOrigin() //AllowAllOrigins;
+                   //.WithMethods("GET") //AllowSpecificMethods;
+                   //.WithMethods("GET", "PUT") //AllowSpecificMethods;
+                   //.WithMethods("GET", "PUT", "POST") //AllowSpecificMethods;
+ .WithMethods("GET", "PUT", "POST", "DELETE") //AllowSpecificMethods;
+                                              //.AllowAnyMethod() //AllowAllMethods;
+
+ //.WithHeaders("Accept", "Content-type", "Origin", "X-Custom-Header");  //AllowSpecificHeaders;
+ .AllowAnyHeader(); //AllowAllHeaders;
+   })
+);
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -61,8 +81,9 @@ namespace api
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
-
+            app.UseAuthentication();
             app.UseMvc();
+            app.UseCors("AllowCors");
         }
     }
 }
