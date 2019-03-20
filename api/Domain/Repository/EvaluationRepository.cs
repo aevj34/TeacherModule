@@ -9,7 +9,9 @@
  public interface EvaluationRepository
  {
 
-  List < EvaluationListDto> GetEvaluations(Int32 evaluationFormulaID ,Int32 schoolID ,Boolean active  ) ; 
+  List < EvaluationListDto> GetEvaluations(Int32 evaluationFormulaID ,Int32 schoolID ,Boolean active, int teacherTypeID) ;
+  List<EvaluationListDto> GetEvaluationsLegend(Int32 evaluationFormulaID, Int32 schoolID, Boolean active);
+
  }
  }
 

@@ -10,7 +10,7 @@ namespace api.Domain.Repository
  {
  public interface SchoolYearRepository
  {
-        List<SchoolYearListDto> GetBycurrentYearByschoolIDByactive(Boolean currentYear, Int32 schoolID, Boolean active);
+        SchoolYearListDto Obtain(Int32 schoolYearID);
     }
  }
 

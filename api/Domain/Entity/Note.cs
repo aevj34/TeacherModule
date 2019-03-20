@@ -7,8 +7,8 @@ namespace api.Domain.Entity
     {
 	public Int32 noteID { get; set; }
 	public Int32 enrollmentID { get; set; }
-	public Int32 enrollmentDetail { get; set; }
-	public Decimal note { get; set; }
+	public Int32 enrollmentDetailID { get; set; }
+	public string note { get; set; }
 	public Int32 studentID { get; set; }
 	public Int32 courseID { get; set; }
 	public Int32 schoolID { get; set; }
@@ -22,6 +22,10 @@ namespace api.Domain.Entity
 	public Int32 periodTypeID { get; set; }
 	public Int32 evaluationID { get; set; }
 	public Boolean active { get; set; }
+    public Int32 grade { get; set; }
+
+    public Boolean isChanged { get; set; }
+
     }
   }
 

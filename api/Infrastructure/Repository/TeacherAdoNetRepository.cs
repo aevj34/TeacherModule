@@ -14,14 +14,77 @@ namespace api.Infrastructure.Repository
     public class TeacherAdoNetRepository : TeacherRepository
     {
 
-    public Teacher GetByDni(String Dni)
+        public Teacher GetByTeacherID(int teacherID, int schoolID)
+        {
+            SqlConnection conn = null;
+            SqlDataReader drUsers;
+            String strSqlUser;
+            SqlCommand cmdUser;
+            SqlParameter prmteacherID = null;
+            SqlParameter prmSchoolID = null;
+
+            try
+            {
+                Teacher objUser = new Teacher();
+                conn = new SqlConnection(Functions.GetConnectionString());
+                strSqlUser = "GetTeacherByteacherID";
+
+                cmdUser = new SqlCommand(strSqlUser, conn);
+                cmdUser.CommandType = CommandType.StoredProcedure;
+
+                prmteacherID = new SqlParameter();
+                prmteacherID.ParameterName = "@teacherID";
+                prmteacherID.SqlDbType = SqlDbType.Int;
+                prmteacherID.Value = teacherID;
+                cmdUser.Parameters.Add(prmteacherID);
+
+                prmSchoolID = new SqlParameter();
+                prmSchoolID.ParameterName = "@schoolID";
+                prmSchoolID.SqlDbType = SqlDbType.Int;
+                prmSchoolID.Value = schoolID;
+                cmdUser.Parameters.Add(prmSchoolID);
+
+                cmdUser.Connection.Open();
+                drUsers = cmdUser.ExecuteReader();
+
+                AmazonS3 s3 = new AmazonS3();
+                s3 = AmazonS3Factory.setAmazonS3();
+
+                if (drUsers.Read())
+                {
+                    objUser = new Teacher();
+                    objUser.teacherID = drUsers.GetInt32(drUsers.GetOrdinal("TeacherID"));
+                    objUser.name = drUsers.GetString(drUsers.GetOrdinal("Name"));
+                    objUser.shortName = drUsers.GetString(drUsers.GetOrdinal("shortName"));
+                    objUser.roleID = drUsers.GetInt32(drUsers.GetOrdinal("RoleID"));
+                    objUser.schoolID = drUsers.GetInt32(drUsers.GetOrdinal("SchoolID"));
+                    objUser.Dni = drUsers.GetString(drUsers.GetOrdinal("Dni"));
+                    objUser.ImageKey = drUsers.GetString(drUsers.GetOrdinal("ImageKey"));
+                    objUser.endPoint = s3.getTeacherEndPoint(objUser.schoolID, objUser.ImageKey);
+                }
+
+                cmdUser.Connection.Close();
+                conn.Dispose();
+
+                return objUser;
+
+            }
+            catch (Exception ex)
+            {
+                conn.Dispose();
+                throw ex;
+            }
+
+        }
+
+        public Teacher GetByDni(String Dni, int schoolID)
     {
       SqlConnection conn = null;
       SqlDataReader drUsers;
       String strSqlUser;
       SqlCommand cmdUser;
       SqlParameter prmDni = null;
-
+            SqlParameter prmSchoolID = null;
       try
       {
 
@@ -40,10 +103,19 @@ namespace api.Infrastructure.Repository
         prmDni.Value = Dni;
         cmdUser.Parameters.Add(prmDni);
 
+        prmSchoolID = new SqlParameter();
+        prmSchoolID.ParameterName = "@schoolID";
+        prmSchoolID.SqlDbType = SqlDbType.Int;
+        prmSchoolID.Value = schoolID;
+        cmdUser.Parameters.Add(prmSchoolID);
+
         cmdUser.Connection.Open();
         drUsers = cmdUser.ExecuteReader();
 
-        if (drUsers.Read())
+        AmazonS3 s3 = new AmazonS3();
+         s3 = AmazonS3Factory.setAmazonS3();
+
+         if (drUsers.Read())
         {
           objUser = new Teacher();
           objUser.teacherID = drUsers.GetInt32(drUsers.GetOrdinal("TeacherID"));
@@ -52,8 +124,10 @@ namespace api.Infrastructure.Repository
           objUser.roleID = drUsers.GetInt32(drUsers.GetOrdinal("RoleID"));
           objUser.schoolID = drUsers.GetInt32(drUsers.GetOrdinal("SchoolID"));
           objUser.Dni = drUsers.GetString(drUsers.GetOrdinal("Dni"));
-          objUser.Password = drUsers.GetString(drUsers.GetOrdinal("Password"));
-        }
+          objUser.ImageKey = drUsers.GetString(drUsers.GetOrdinal("ImageKey"));
+          objUser.password = drUsers.GetString(drUsers.GetOrdinal("Password"));
+          objUser.endPoint = s3.getTeacherEndPoint(objUser.schoolID, objUser.ImageKey);
+         }
 
         cmdUser.Connection.Close();
         conn.Dispose();
@@ -70,7 +144,7 @@ namespace api.Infrastructure.Repository
     }
 
 
-    public TeacherDto GetByTeacherID(int TeacherID)
+    public TeacherDto Obtain(int TeacherID)
         {
 
             SqlConnection conn = null;

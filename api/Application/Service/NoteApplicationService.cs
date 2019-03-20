@@ -20,17 +20,13 @@ namespace api.Application.Service
  }
 
 
-
-
-
-
  public Object Insert(Note noteDto)
  {
  try
  {
- BaseResponseDto<Note > baseResponseDto = new BaseResponseDto<Note >();
+ BaseResponseDto<Note > baseResponseDto = new BaseResponseDto<Note>();
  int noteID = this.noteRepository.Insert(noteDto);
- baseResponseDto.single = this.noteRepository.Obtain(noteID); 
+ //baseResponseDto.single = this.noteRepository.Obtain(noteID); 
  return baseResponseDto;
  }
  catch (Exception ex)

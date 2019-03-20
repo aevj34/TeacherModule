@@ -29,8 +29,7 @@ namespace api.Domain.Entity
 	public DateTime startDateSchool { get; set; }
 	public String lastSchool { get; set; }
 	public Boolean active { get; set; }
-
-    public String Password { get; set; }
+        public String endPoint { get; set; }
         public String shortName { get; set; }
 
     }

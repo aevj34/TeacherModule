@@ -10,8 +10,9 @@ namespace api.Domain.Repository
     public interface TeacherRepository
     {
 
-      Teacher GetByDni(String Dni);
-      TeacherDto GetByTeacherID(int UserID);
+      Teacher GetByDni(String Dni, int schoolID);
+      Teacher GetByTeacherID(int teacherID, int schoolID);
+      TeacherDto Obtain(int UserID);
 
   }
 }

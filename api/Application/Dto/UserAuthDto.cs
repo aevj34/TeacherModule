@@ -17,6 +17,7 @@ namespace api.Application.Dto
 
         public String shortName { get; set; }
         public String fullName { get; set; }
+        public String endPoint { get; set; }
 
         public UserAuthDto()
         {

@@ -5,7 +5,7 @@
     public class SchoolYearListDto
     {
 	public Int32 schoolYearID { get; set; }
-	public Int32 year { get; set; }
+	public Int32 minimumNote { get; set; }
     }
   }
 

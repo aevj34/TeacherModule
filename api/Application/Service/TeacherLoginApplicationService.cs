@@ -32,7 +32,7 @@ namespace api.Application.Service
             Notification notification = new Notification();
 
             Teacher autTheacher = null;
-            autTheacher = this.teacherRepository.GetByDni(teacherDto.Dni);
+            autTheacher = this.teacherRepository.GetByDni(teacherDto.Dni,teacherDto.SchoolID);
 
             if (autTheacher.Dni == null)
             {
@@ -40,7 +40,7 @@ namespace api.Application.Service
                 return this.getApplicationErrorResponse(notification.getErrors());
             }
 
-            if (!Hashing.CheckMatch(autTheacher.Password, teacherDto.Password))
+            if (!Hashing.CheckMatch(autTheacher.password, teacherDto.Password))
             {
                 notification.addError("La contraseña es incorrecta");
                 return this.getApplicationErrorResponse(notification.getErrors());
@@ -74,20 +74,19 @@ namespace api.Application.Service
         }
 
 
-        public List<MenuListDto> getMenus(string dni)
+        public List<MenuListDto> getMenus(string dni, int schoolID)
 
         {
             Teacher teacher = new Teacher();
-            teacher = this.teacherRepository.GetByDni(dni);
+            teacher = this.teacherRepository.GetByDni(dni, schoolID);
 
             int roleID = teacher.roleID;
-            int schoolID = teacher.schoolID;
             bool active = true;
 
             List<RoleInActionListDto> actionsxRole = this.roleInActionRepository.GetByroleIDByschoolIDByactive(roleID, schoolID, active);
 
             IEnumerable<String> menusString = actionsxRole.Select(x => x.menu_name).Distinct();
-            IEnumerable<String> iconsString = actionsxRole.Select(x => x.menu_description).Distinct();
+            //IEnumerable<String> iconsString = actionsxRole.Select(x => x.menu_description).Distinct();
 
             List<MenuListDto> menus = new List<MenuListDto>();
 
@@ -96,18 +95,16 @@ namespace api.Application.Service
                 MenuListDto menuDto = new MenuListDto();
                 menuDto.name = menu; ;
 
-                IEnumerable<String> modulesString = actionsxRole.Where(e => e.menu_name == menu).Select(x => x.module_name).Distinct();
-                List<ModuleListDto> modules = new List<ModuleListDto>();
-                foreach (String module in modulesString)
+                string icon = "";
+                RoleInActionListDto obj = new RoleInActionListDto();
+                obj = actionsxRole.Where(x => x.menu_name == menu).FirstOrDefault();
+                if ( obj != null)
                 {
-                    ModuleListDto moduleDto = new ModuleListDto();
-                    moduleDto.name = module;
-                    moduleDto.actions = actionsxRole.Where(e => e.menu_name == menu && e.module_name == module).ToList();
-                    menuDto.description = moduleDto.actions.FirstOrDefault().menu_description;
-                    modules.Add(moduleDto);
+                    icon = obj.menu_description;
                 }
 
-                menuDto.modules = modules;
+                menuDto.description = icon;
+                menuDto.actions = actionsxRole.Where(e => e.menu_name == menu).ToList();
                 menus.Add(menuDto);
             }
             return menus;

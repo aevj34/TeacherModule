@@ -34,9 +34,9 @@ namespace api.Controllers
 
         [HttpGet]
         [Route("getMenus")]
-        public Object getMenus(string dni)
+        public Object getMenus(string dni, int schoolID)
         {
-            return teacherLoginApplicationService.getMenus(dni);
+            return teacherLoginApplicationService.getMenus(dni, schoolID);
         }
 
     }

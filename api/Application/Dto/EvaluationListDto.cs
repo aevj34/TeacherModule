@@ -9,6 +9,13 @@
     public decimal weight { get; set; }
     public Boolean isAverage { get; set; }
 	public String evaluationType_abbreviation { get; set; }
+    public String evaluationType_name { get; set; }
+    public bool isExpired { get; set; }
+    public string ExpiredMessage { get; set; }
+    public int columnWidth { get; set; }
+    public string ExpiredAfter { get; set; }
+    public bool isAboutExpired { get; set; }
+
     }
   }
 

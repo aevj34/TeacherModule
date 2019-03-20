@@ -12,7 +12,7 @@ namespace api.Application.Dto
         public String description { get; set; }
         public Int32 orderMenu { get; set; }
         public Boolean active { get; set; }
-        public List<ActionListDto> actions { get; set; }
+        public List<RoleInActionListDto> actions { get; set; }
         public List<ModuleListDto> modules { get; set; }
         public String school_name { get; set; }
 

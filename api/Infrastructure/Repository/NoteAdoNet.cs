@@ -86,6 +86,87 @@ namespace api.Infrastructure.Repository
 
   }
 
+        public List<TutorNoteDto> GetNotesByStudent(Int32 enrollmentID, Int32 studentID, Int32 schoolID, Boolean active)
+        {
+
+            SqlConnection conn = null;
+            SqlDataReader reader;
+            String sql;
+            SqlCommand command;
+            SqlParameter prmenrollmentID = null;
+            SqlParameter prmstudentID = null;
+            SqlParameter prmschoolID = null;
+            SqlParameter prmactive = null;
+
+            try
+            {
+                TutorNoteDto note;
+                List<TutorNoteDto> lstNotes;
+
+                conn = new SqlConnection(Functions.GetConnectionString());
+
+                sql = "GetNoteByStudent";
+
+                command = new SqlCommand(sql, conn);
+                command.CommandType = CommandType.StoredProcedure;
+
+                prmenrollmentID = new SqlParameter();
+                prmenrollmentID.ParameterName = "@enrollmentID";
+                prmenrollmentID.SqlDbType = SqlDbType.Int;
+                prmenrollmentID.Value = enrollmentID;
+                command.Parameters.Add(prmenrollmentID);
+
+                prmstudentID = new SqlParameter();
+                prmstudentID.ParameterName = "@studentID";
+                prmstudentID.SqlDbType = SqlDbType.Int;
+                prmstudentID.Value = studentID;
+                command.Parameters.Add(prmstudentID);
+
+                prmschoolID = new SqlParameter();
+                prmschoolID.ParameterName = "@schoolID";
+                prmschoolID.SqlDbType = SqlDbType.Int;
+                prmschoolID.Value = schoolID;
+                command.Parameters.Add(prmschoolID);
+
+                prmactive = new SqlParameter();
+                prmactive.ParameterName = "@active";
+                prmactive.SqlDbType = SqlDbType.Bit;
+                prmactive.Value = active;
+                command.Parameters.Add(prmactive);
+
+                command.Connection.Open();
+                reader = command.ExecuteReader();
+
+                lstNotes = new List<TutorNoteDto>();
+
+                while (reader.Read())
+                {
+                    note = new TutorNoteDto();
+                    note.noteID = reader.GetInt32(reader.GetOrdinal("noteID"));
+                    if (reader.GetDecimal(reader.GetOrdinal("note")) == 100)
+                        note.note = "";
+                    else
+                        note.note = reader.GetDecimal(reader.GetOrdinal("note")).ToString();
+                    note.courseID = reader.GetInt32(reader.GetOrdinal("courseID"));
+                    note.schoolYearID = reader.GetInt32(reader.GetOrdinal("schoolYearID"));
+                    note.evaluationID = reader.GetInt32(reader.GetOrdinal("evaluationID"));
+                    lstNotes.Add(note);
+
+                }
+
+                command.Connection.Close();
+                conn.Dispose();
+
+                return lstNotes;
+
+            }
+            catch (Exception ex)
+            {
+                conn.Dispose();
+                throw ex;
+            }
+
+        }
 
 
         public Int32 Insert(Note note)
@@ -96,7 +177,7 @@ namespace api.Infrastructure.Repository
             SqlCommand cmdNoteInsert;
             SqlParameter prmnoteID;
             SqlParameter prmenrollmentID;
-            SqlParameter prmenrollmentDetail;
+            SqlParameter prmenrollmentDetailID;
             SqlParameter prmnote;
             SqlParameter prmstudentID;
             SqlParameter prmcourseID;
@@ -110,6 +191,7 @@ namespace api.Infrastructure.Repository
             SqlParameter prmsectionID;
             SqlParameter prmperiodTypeID;
             SqlParameter prmevaluationID;
+            SqlParameter prmgrade;
             SqlParameter prmactive;
             Int32 intnoteID;
 
@@ -133,18 +215,21 @@ namespace api.Infrastructure.Repository
                 prmenrollmentID.Value = note.enrollmentID;
                 cmdNoteInsert.Parameters.Add(prmenrollmentID);
 
-                prmenrollmentDetail = new SqlParameter();
-                prmenrollmentDetail.ParameterName = "@enrollmentDetail";
-                prmenrollmentDetail.SqlDbType = SqlDbType.Int;
-                prmenrollmentDetail.Value = note.enrollmentDetail;
-                cmdNoteInsert.Parameters.Add(prmenrollmentDetail);
+                prmenrollmentDetailID = new SqlParameter();
+                prmenrollmentDetailID.ParameterName = "@enrollmentDetailID";
+                prmenrollmentDetailID.SqlDbType = SqlDbType.Int;
+                prmenrollmentDetailID.Value = note.enrollmentDetailID;
+                cmdNoteInsert.Parameters.Add(prmenrollmentDetailID);
 
-                prmnote = new SqlParameter();
-                prmnote.ParameterName = "@note";
-                prmnote.SqlDbType = SqlDbType.Decimal;
-                prmnote.Value = note.note;
-                cmdNoteInsert.Parameters.Add(prmnote);
-
+                if (note.note != "100")
+                {
+                    prmnote = new SqlParameter();
+                    prmnote.ParameterName = "@note";
+                    prmnote.SqlDbType = SqlDbType.Decimal;
+                    prmnote.Value = note.note;
+                    cmdNoteInsert.Parameters.Add(prmnote);
+                }
+                
                 prmstudentID = new SqlParameter();
                 prmstudentID.ParameterName = "@studentID";
                 prmstudentID.SqlDbType = SqlDbType.Int;
@@ -217,6 +302,12 @@ namespace api.Infrastructure.Repository
                 prmevaluationID.Value = note.evaluationID;
                 cmdNoteInsert.Parameters.Add(prmevaluationID);
 
+                prmgrade = new SqlParameter();
+                prmgrade.ParameterName = "@grade";
+                prmgrade.SqlDbType = SqlDbType.Int;
+                prmgrade.Value = note.grade;
+                cmdNoteInsert.Parameters.Add(prmgrade);
+
                 prmactive = new SqlParameter();
                 prmactive.ParameterName = "@active";
                 prmactive.SqlDbType = SqlDbType.Bit;
@@ -232,6 +323,205 @@ namespace api.Infrastructure.Repository
                 conn.Dispose();
 
                 return intnoteID;
+
+            }
+            catch (Exception ex)
+            {
+                conn.Dispose();
+                throw ex;
+            }
+
+        }
+
+
+        public void Update(Note noteDto)
+
+        {
+            SqlConnection conn = null;
+            String sql;
+            SqlCommand command;
+            SqlParameter prmUnoteID;
+            SqlParameter prmUenrollmentID;
+            SqlParameter prmUenrollmentDetailID;
+            SqlParameter prmUnote;
+            SqlParameter prmUstudentID;
+            SqlParameter prmUcourseID;
+            SqlParameter prmUschoolID;
+            SqlParameter prmUheadquartersID;
+            SqlParameter prmUcareerID;
+            SqlParameter prmUschoolYearID;
+            SqlParameter prmUprogrammingID;
+            SqlParameter prmUevaluationPeriodID;
+            SqlParameter prmUturnID;
+            SqlParameter prmUsectionID;
+            SqlParameter prmUperiodTypeID;
+            SqlParameter prmUevaluationID;
+            SqlParameter prmUgrade;
+            SqlParameter prmUactive;
+
+            try
+            {
+                conn = new SqlConnection(Functions.GetConnectionString());
+                sql = "UpdateNote";
+                command = new SqlCommand(sql, conn);
+                command.CommandType = CommandType.StoredProcedure;
+
+                prmUnoteID = new SqlParameter();
+                prmUnoteID.ParameterName = "@noteID";
+                prmUnoteID.SqlDbType = SqlDbType.Int;
+                prmUnoteID.Value = noteDto.noteID;
+                command.Parameters.Add(prmUnoteID);
+
+                prmUenrollmentID = new SqlParameter();
+                prmUenrollmentID.ParameterName = "@enrollmentID";
+                prmUenrollmentID.SqlDbType = SqlDbType.Int;
+                prmUenrollmentID.Value = noteDto.enrollmentID;
+                command.Parameters.Add(prmUenrollmentID);
+
+                prmUenrollmentDetailID = new SqlParameter();
+                prmUenrollmentDetailID.ParameterName = "@enrollmentDetailID";
+                prmUenrollmentDetailID.SqlDbType = SqlDbType.Int;
+                prmUenrollmentDetailID.Value = noteDto.enrollmentDetailID;
+                command.Parameters.Add(prmUenrollmentDetailID);
+
+                prmUnote = new SqlParameter();
+                prmUnote.ParameterName = "@note";
+                prmUnote.SqlDbType = SqlDbType.Decimal;
+                prmUnote.Value = noteDto.note;
+                command.Parameters.Add(prmUnote);
+
+                prmUstudentID = new SqlParameter();
+                prmUstudentID.ParameterName = "@studentID";
+                prmUstudentID.SqlDbType = SqlDbType.Int;
+                prmUstudentID.Value = noteDto.studentID;
+                command.Parameters.Add(prmUstudentID);
+
+                prmUcourseID = new SqlParameter();
+                prmUcourseID.ParameterName = "@courseID";
+                prmUcourseID.SqlDbType = SqlDbType.Int;
+                prmUcourseID.Value = noteDto.courseID;
+                command.Parameters.Add(prmUcourseID);
+
+                prmUschoolID = new SqlParameter();
+                prmUschoolID.ParameterName = "@schoolID";
+                prmUschoolID.SqlDbType = SqlDbType.Int;
+                prmUschoolID.Value = noteDto.schoolID;
+                command.Parameters.Add(prmUschoolID);
+
+                prmUheadquartersID = new SqlParameter();
+                prmUheadquartersID.ParameterName = "@headquartersID";
+                prmUheadquartersID.SqlDbType = SqlDbType.Int;
+                prmUheadquartersID.Value = noteDto.headquartersID;
+                command.Parameters.Add(prmUheadquartersID);
+
+                prmUcareerID = new SqlParameter();
+                prmUcareerID.ParameterName = "@careerID";
+                prmUcareerID.SqlDbType = SqlDbType.Int;
+                prmUcareerID.Value = noteDto.careerID;
+                command.Parameters.Add(prmUcareerID);
+
+                prmUschoolYearID = new SqlParameter();
+                prmUschoolYearID.ParameterName = "@schoolYearID";
+                prmUschoolYearID.SqlDbType = SqlDbType.Int;
+                prmUschoolYearID.Value = noteDto.schoolYearID;
+                command.Parameters.Add(prmUschoolYearID);
+
+                prmUprogrammingID = new SqlParameter();
+                prmUprogrammingID.ParameterName = "@programmingID";
+                prmUprogrammingID.SqlDbType = SqlDbType.Int;
+                prmUprogrammingID.Value = noteDto.programmingID;
+                command.Parameters.Add(prmUprogrammingID);
+
+                prmUevaluationPeriodID = new SqlParameter();
+                prmUevaluationPeriodID.ParameterName = "@evaluationPeriodID";
+                prmUevaluationPeriodID.SqlDbType = SqlDbType.Int;
+                prmUevaluationPeriodID.Value = noteDto.evaluationPeriodID;
+                command.Parameters.Add(prmUevaluationPeriodID);
+
+                prmUturnID = new SqlParameter();
+                prmUturnID.ParameterName = "@turnID";
+                prmUturnID.SqlDbType = SqlDbType.Int;
+                prmUturnID.Value = noteDto.turnID;
+                command.Parameters.Add(prmUturnID);
+
+                prmUsectionID = new SqlParameter();
+                prmUsectionID.ParameterName = "@sectionID";
+                prmUsectionID.SqlDbType = SqlDbType.Int;
+                prmUsectionID.Value = noteDto.sectionID;
+                command.Parameters.Add(prmUsectionID);
+
+                prmUperiodTypeID = new SqlParameter();
+                prmUperiodTypeID.ParameterName = "@periodTypeID";
+                prmUperiodTypeID.SqlDbType = SqlDbType.Int;
+                prmUperiodTypeID.Value = noteDto.periodTypeID;
+                command.Parameters.Add(prmUperiodTypeID);
+
+                prmUevaluationID = new SqlParameter();
+                prmUevaluationID.ParameterName = "@evaluationID";
+                prmUevaluationID.SqlDbType = SqlDbType.Int;
+                prmUevaluationID.Value = noteDto.evaluationID;
+                command.Parameters.Add(prmUevaluationID);
+
+                prmUgrade = new SqlParameter();
+                prmUgrade.ParameterName = "@grade";
+                prmUgrade.SqlDbType = SqlDbType.Int;
+                prmUgrade.Value = noteDto.grade;
+                command.Parameters.Add(prmUgrade);
+
+                prmUactive = new SqlParameter();
+                prmUactive.ParameterName = "@active";
+                prmUactive.SqlDbType = SqlDbType.Bit;
+                prmUactive.Value = noteDto.active;
+                command.Parameters.Add(prmUactive);
+
+                command.Connection.Open();
+                command.ExecuteNonQuery();
+
+                command.Connection.Close();
+                conn.Dispose();
+
+            }
+            catch (Exception ex)
+            {
+                conn.Dispose();
+                throw ex;
+            }
+
+        }
+
+
+        public void UpdateWhiteNoteBynoteID(Int32 noteID_Filter)
+        {
+            SqlConnection conn = null;
+            String sql;
+            SqlCommand command;
+            SqlParameter prmUnoteID_Filter;
+            SqlParameter prmUnote;
+
+            try
+            {
+                conn = new SqlConnection(Functions.GetConnectionString());
+                sql = "UpdateNoteBynoteID";
+                command = new SqlCommand(sql, conn);
+                command.CommandType = CommandType.StoredProcedure;
+
+                prmUnoteID_Filter = new SqlParameter();
+                prmUnoteID_Filter.ParameterName = "@noteID_Filter";
+                prmUnoteID_Filter.SqlDbType = SqlDbType.Int;
+                prmUnoteID_Filter.Value = noteID_Filter;
+                command.Parameters.Add(prmUnoteID_Filter);
+
+                prmUnote = new SqlParameter();
+                prmUnote.ParameterName = "@note";
+                prmUnote.SqlDbType = SqlDbType.Decimal;
+                prmUnote.Value = null;
+                command.Parameters.Add(prmUnote);
+
+                command.Connection.Open();
+                command.ExecuteNonQuery();
+
+                command.Connection.Close();
+                conn.Dispose();
 
             }
             catch (Exception ex)
